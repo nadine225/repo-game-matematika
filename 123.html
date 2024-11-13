@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Matematika</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        input[type="text"], input[type="number"] {
+            padding: 10px;
+            margin: 10px 0;
+            width: 200px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .history {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        .question {
+            font-size: 24px;
+            margin-top: 20px;
+        }
+        .result {
+            font-size: 20px;
+            color: green;
+        }
+        .game-over {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Game Matematika</h1>
+
+    <!-- Login Section -->
+    <div id="login-section">
+        <label for="username">Masukkan Nama Anda:</label>
+        <input type="text" id="username" placeholder="Nama Anda">
+        <button onclick="startGame()">Mulai Game</button>
+    </div>
+
+    <!-- Game Section -->
+    <div id="game-section" style="display:none;">
+        <div class="question" id="question"></div>
+        <input type="number" id="answer" placeholder="Jawaban" />
+        <button onclick="submitAnswer()">Kirim Jawaban</button>
+
+        <div class="result" id="result"></div>
+
+        <div class="history" id="history">
+            <h3>Riwayat Jawaban:</h3>
+            <ul id="history-list"></ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    let username = '';
+    let score = 0;
+    let questionCount = 0;
+    let history = [];
+    let currentQuestion = {};
+
+    // Fungsi untuk mulai permainan setelah login
+    function startGame() {
+        username = document.getElementById('username').value;
+        if (username.trim() === '') {
+            alert('Nama tidak boleh kosong!');
+            return;
+        }
+        document.getElementById('login-section').style.display = 'none';
+        document.getElementById('game-section').style.display = 'block';
+        generateQuestion();
+    }
+
+    // Fungsi untuk menghasilkan soal matematika acak
+    function generateQuestion() {
+        const operators = ['+', '-', '*', '/'];
+        const operator = operators[Math.floor(Math.random() * operators.length)];
+        const num1 = Math.floor(Math.random() * 10) + 1;
+        const num2 = Math.floor(Math.random() * 10) + 1;
+
+        currentQuestion = {
+            num1: num1,
+            num2: num2,
+            operator: operator,
+            answer: calculateAnswer(num1, num2, operator)
+        };
+
+        document.getElementById('question').textContent = `${num1} ${operator} ${num2} = ?`;
+    }
+
+    // Fungsi untuk menghitung jawaban
+    function calculateAnswer(num1, num2, operator) {
+        switch (operator) {
+            case '+': return num1 + num2;
+            case '-': return num1 - num2;
+            case '*': return num1 * num2;
+            case '/': return (num1 / num2).toFixed(2); // Pembagian hasil desimal
+        }
+    }
+
+    // Fungsi untuk mengirim jawaban
+    function submitAnswer() {
+        const userAnswer = parseFloat(document.getElementById('answer').value);
+        if (isNaN(userAnswer)) {
+            alert('Masukkan jawaban yang valid!');
+            return;
+        }
+
+        const correct = userAnswer === parseFloat(currentQuestion.answer);
+        if (correct) {
+            score++;
+            document.getElementById('result').textContent = 'Jawaban Benar!';
+            document.getElementById('result').style.color = 'green';
+        } else {
+            document.getElementById('result').textContent = `Jawaban Salah! Jawaban yang benar adalah ${currentQuestion.answer}`;
+            document.getElementById('result').style.color = 'red';
+        }
+
+        // Tambahkan riwayat
+        history.push(`${currentQuestion.num1} ${currentQuestion.operator} ${currentQuestion.num2} = ${userAnswer} (${correct ? 'Benar' : 'Salah'})`);
+        updateHistory();
+
+        questionCount++;
+        if (questionCount < 5) {
+            setTimeout(generateQuestion, 2000); // Tunggu 2 detik untuk soal selanjutnya
+        } else {
+            setTimeout(endGame, 2000); // Akhiri permainan setelah 5 soal
+        }
+    }
+
+    // Fungsi untuk memperbarui riwayat permainan
+    function updateHistory() {
+        const historyList = document.getElementById('history-list');
+        historyList.innerHTML = ''; // Clear riwayat lama
+        history.forEach((item, index) => {
+            const li = document.createElement('li');
+            li.textContent = item;
+            historyList.appendChild(li);
+        });
+    }
+
+    // Fungsi untuk mengakhiri permainan
+    function endGame() {
+        document.getElementById('result').textContent = `Game Over! Skor Anda: ${score}`;
+        document.getElementById('result').style.color = 'blue';
+        document.getElementById('answer').disabled = true;
+        document.querySelector('button').disabled = true; // Nonaktifkan tombol
+    }
+</script>
+
+</body>
+</html>
